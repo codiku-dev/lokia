@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react-native';
 import { cssInterop } from 'nativewind';
-import { Check, X } from 'lucide-react-native';
+import { Check, Send, X } from 'lucide-react-native';
 
 /* ADD ICONS HERE TO BE ABLE TO USE CLASSNAME */
 /* ADD ICONS HERE TO BE ABLE TO USE CLASSNAME */
@@ -10,7 +10,7 @@ import { Check, X } from 'lucide-react-native';
 /* ADD ICONS HERE TO BE ABLE TO USE CLASSNAME */
 /* ADD ICONS HERE TO BE ABLE TO USE CLASSNAME */
 /* ADD ICONS HERE TO BE ABLE TO USE CLASSNAME */
-const ICONS = [Check, X];
+const ICONS = [Check, X, Send];
 
 
 export function iconWithClassName(icon: LucideIcon) {

@@ -77,14 +77,17 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.awesomeproject"
+    namespace "com.lokia"
     defaultConfig {
-        applicationId "com.awesomeproject"
+        applicationId "com.lokia"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
     }
+
+  
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -110,6 +113,7 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    implementation project(':react-native-fs')
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

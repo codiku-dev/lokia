@@ -1,5 +1,5 @@
 {
-  "name": "super-native",
+  "name": "lokia",
   "version": "0.0.1",
   "private": true,
   "author": "Codiku (Robin Lebhar)",
@@ -11,7 +11,8 @@
     "start": "react-native start",
     "start:cache": "react-native start --reset-cache",
     "test": "npx jest",
-    "postinstall": "npx pod-install && cd ./android && ./gradlew clean && cd ../"
+    "postinstall_": "npx pod-install && cd ./android && ./gradlew clean && cd ../",
+    "move-model-external": "adb push ./assets/Llama-3.2-1B-Instruct-Q6_K_L.gguf /storage/emulated/0/Android/data/com.lokia/files/Llama-3.2-1B-Instruct-Q6_K_L.gguf"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -20,6 +21,7 @@
     "@react-navigation/elements": "^2.4.2",
     "@react-navigation/native": "^7.1.9",
     "@react-navigation/native-stack": "^7.3.13",
+    "@rn-primitives/avatar": "^1.2.0",
     "@rn-primitives/checkbox": "^1.2.0",
     "@rn-primitives/dialog": "^1.2.0",
     "@rn-primitives/label": "^1.2.0",
@@ -33,6 +35,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "i18next": "^25.2.1",
+    "llama.rn": "^0.5.11",
     "lucide-react-native": "^0.511.0",
     "nativewind": "^4.1.23",
     "react": "19.0.0",
@@ -40,12 +43,14 @@
     "react-i18next": "^15.5.2",
     "react-native": "0.79.2",
     "react-native-bootsplash": "^6.3.8",
+    "react-native-fs": "^2.20.0",
     "react-native-mmkv": "^3.2.0",
     "react-native-react-query-devtools": "^1.3.10",
     "react-native-reanimated": "^3.17.5",
     "react-native-safe-area-context": "^5.4.1",
     "react-native-screens": "^4.10.0",
     "react-native-svg": "^15.12.0",
+    "react-native-svg-transformer": "^1.5.1",
     "react-native-toast-message": "^2.3.0",
     "reactotron-plugin-zustand": "^2.0.8",
     "reactotron-react-native": "^5.1.13",

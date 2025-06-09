@@ -1,3 +1,14 @@
+# Lokia
+
+# ADB commands
+```shell 
+#Send a model to device
+adb push ./assets/llama-3.2-1b-instruct-q6_k.gguf /storage/emulated/0/Android/data/com.lokia/files/llama-3.2-1b-instruct-q6_k.gguf
+#List devices models
+adb shell ls "/storage/emulated/0/Android/data/com.lokia/files/" 
+#Delete a model
+adb shell rm "/storage/emulated/0/Android/data/com.lokia/files/Llama-3.2-1B-Instruct-Q6_K_L.gguf" 
+  ```
 # 🚀 SuperNative : React Native Supercharged Boilerplate
 
 ![SuperNative Banner](assets/images/readme_banner.png)
@@ -86,4 +97,5 @@ To use custom icons with className support, add them to the `ICONS` object in `@
 
 ## 📝 License
 This project is licensed under the MIT License - see the LICENSE file for details.
+
 
