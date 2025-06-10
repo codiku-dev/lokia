@@ -12,6 +12,7 @@ export const StreamingBubble = memo(function StreamingBubble({ content }: Stream
         <MessageBubble
             message={{ role: 'assistant', content }}
             isLastInGroup={true}
+            isStreamFinished={false}
         />
     )
 }) 

@@ -74,7 +74,8 @@ export function useChat(p: Props) {
                             model: modelPath,
                             use_mlock: true,
                             n_ctx: 2048,
-                            n_gpu_layers: 99,
+                            n_gpu_layers: 99, // number of layers to store in VRAM (Currently only for iOS)
+
                         })
                         contextRef.current = context
                         console.log("Model loaded")
@@ -109,13 +110,17 @@ export function useChat(p: Props) {
             await context.completion(
                 {
                     messages: [...messages],
-                    n_predict: 100,
-                    stop: ["<|eot_id|>"],
+                    n_predict: -1,
+                    stop: ["<end_of_turn>", "<|eot_id|>", "Human:", "Assistant:"],
+                    temperature: 0.7,
+                    top_p: 0.9,
                 },
-                (data) => {
+                async (data) => {
                     const { token } = data
-                    response += token
-                    setCurrentResponse(response)
+                    if (!token.includes("<end_of_turn>") && !token.includes("<|eot_id|>")) {
+                        response += token
+                        setCurrentResponse(response)
+                    }
                 },
             )
             setCurrentResponse("")

@@ -2,13 +2,15 @@ import { View } from 'react-native'
 import { Text } from '@/components/ui/text'
 import { cn } from '@/lib/utils'
 import { Message } from '@/types/ai-types'
+import { MessageContent } from './message-content'
 
 type MessageBubbleProps = {
     message: Message
     isLastInGroup: boolean
+    isStreamFinished?: boolean
 }
 
-export function MessageBubble({ message, isLastInGroup }: MessageBubbleProps) {
+export function MessageBubble({ message, isLastInGroup, isStreamFinished = true }: MessageBubbleProps) {
     const isUser = message.role === 'user'
 
     return (
@@ -22,12 +24,16 @@ export function MessageBubble({ message, isLastInGroup }: MessageBubbleProps) {
                 isUser ? "rounded-br-sm" : "rounded-bl-sm",
                 !isLastInGroup && (isUser ? "rounded-tr-sm" : "rounded-tl-sm")
             )}>
-                <Text className={cn(
-                    "text-sm leading-relaxed",
-                    isUser ? "text-white" : "text-black"
-                )}>
-                    {message.content}
-                </Text>
+                {isUser ? (
+                    <Text className="text-sm leading-relaxed text-white">
+                        {message.content}
+                    </Text>
+                ) : (
+                    <MessageContent
+                        content={message.content}
+                        isStreamFinished={isStreamFinished}
+                    />
+                )}
             </View>
         </View>
     )

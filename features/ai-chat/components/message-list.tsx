@@ -5,9 +5,10 @@ import { Message } from '@/types/ai-types'
 
 type MessageListProps = {
     messages: Message[]
+    children?: React.ReactNode
 }
 
-export const MessageList = memo(function MessageList({ messages }: MessageListProps) {
+export const MessageList = memo(function MessageList({ messages, children }: MessageListProps) {
     const scrollViewRef = useRef<ScrollView>(null)
 
     useEffect(() => {
@@ -29,6 +30,7 @@ export const MessageList = memo(function MessageList({ messages }: MessageListPr
                     isLastInGroup={index === messages.length - 1 || messages[index + 1].role !== message.role}
                 />
             ))}
+            {children}
         </ScrollView>
     )
 }) 
