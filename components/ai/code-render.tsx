@@ -8,7 +8,7 @@ export const CodeBlock: LLMOutputComponent = ({ blockMatch }) => {
 
     return (
         <ScrollView horizontal className="bg-[#0D1117] rounded-lg p-2">
-            <Text className="text-white font-mono text-sm">
+            <Text className="font-mono text-sm text-white">
                 {code}
             </Text>
         </ScrollView>

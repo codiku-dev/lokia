@@ -19,7 +19,7 @@ export function AiChat() {
     useEffect(() => {
         if (isModelReady) {
             setTimeout(() => {
-                handleSendMessage('Hello, how are you? And who are you exactly ?')
+                handleSendMessage('Hello,what is the js code for a fibonacci sequence?')
             }, 1000)
         }
     }, [isModelReady])
@@ -63,7 +63,7 @@ export function AiChat() {
                     <Text className="text-lg text-black">No messages yet, start chatting with Mia</Text>
                 </View>
             )}
-            <ScrollView className="flex-1">
+            <ScrollView className="flex-1 ">
                 <MessageList messages={messages.filter(m => m.role !== 'system')}
                 >
                     {isModelAnswering && <StreamingBubble content={currentResponse} />}
