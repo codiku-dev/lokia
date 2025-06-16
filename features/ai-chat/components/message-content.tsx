@@ -29,30 +29,32 @@ function cleanText(text: string): string {
         })
         // Remove any remaining control characters except newlines
         .replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, '')
-        // Normalize whitespace
-        .replace(/\s+/g, ' ')
+        // Normalize whitespace but preserve newlines
+        .replace(/[ \t]+/g, ' ')
         .trim();
 }
 
 // Create a letter-by-letter throttle configuration
 const throttle = throttleBasic({
-    readAheadChars: 0, // Don't withhold any characters
-    targetBufferChars: 0, // Don't maintain any buffer
-    adjustPercentage: 0.1, // Small adjustments to maintain smooth display
-    frameLookBackMs: 100, // Short lookback for immediate response
-    windowLookBackMs: 50, // Short window for precise control
+    readAheadChars: 0,
+    targetBufferChars: 0,
+    adjustPercentage: 0.1,
+    frameLookBackMs: 100,
+    windowLookBackMs: 50,
 });
 
 export function MessageContent({ content, isStreamFinished }: MessageContentProps) {
+    const cleanedContent = cleanText(content);
+
     const { blockMatches } = useLLMOutput({
-        llmOutput: content,
+        llmOutput: cleanedContent,
         fallbackBlock: {
-            component: MarkdownBlock, // from Step 1
+            component: MarkdownBlock,
             lookBack: markdownLookBack(),
         },
         blocks: [
             {
-                component: CodeBlock, // from Step 2
+                component: CodeBlock,
                 findCompleteMatch: findCompleteCodeBlock(),
                 findPartialMatch: findPartialCodeBlock(),
                 lookBack: codeBlockLookBack(),
@@ -61,10 +63,25 @@ export function MessageContent({ content, isStreamFinished }: MessageContentProp
         isStreamFinished,
         throttle,
     });
+
+    // If no blocks are found, render as plain text
+    if (blockMatches.length === 0) {
+        return (
+            <Text className="text-base">
+                {cleanedContent}
+            </Text>
+        );
+    }
+
+    // Debug: log block matches
+    // console.log("the block matches are", blockMatches)
+
     return (
-        <View>
+        <View className="space-y-2">
             {blockMatches.map((blockMatch, index) => {
                 const Component = blockMatch.block.component;
+                // Skip empty blocks
+                if (!blockMatch.output.trim()) return null;
                 return <Component key={index} blockMatch={blockMatch} />;
             })}
         </View>

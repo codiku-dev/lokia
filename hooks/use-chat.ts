@@ -3,11 +3,24 @@ import RNFS from 'react-native-fs'
 import { Platform, PermissionsAndroid } from 'react-native'
 import { initLlama, LlamaContext, loadLlamaModelInfo } from 'llama.rn'
 import { Message } from '../types/ai-types'
+
 type Props = {
-    modelName: string
+    initialMessages?: Message[]
+    modelConfig: {
+        use_mlock: boolean,
+        n_ctx: number,
+        n_gpu_layers: number,
+        model: string,
+    }
+    fakeDelay: number
+    fakeMode?: {
+        fakeMessage: Message
+        fakeResponse: Message
+    }
 }
 
 export function useChat(p: Props) {
+    const [messages, setMessages] = useState<Message[]>(p.initialMessages || [])
     const [isModelReady, setIsModelReady] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [isModelAnswering, setIsModelAnswering] = useState(false)
@@ -47,12 +60,19 @@ export function useChat(p: Props) {
 
     useEffect(() => {
         async function loadModel() {
+            console.log("loading model........");
+
             setIsModelReady(false)
             try {
+                if (p.fakeMode?.fakeMessage) {
+                    setIsModelReady(true)
+                    return
+                }
+
                 await checkAndRequestPermissions()
                 const modelPath = Platform.select({
-                    android: `${RNFS.ExternalDirectoryPath}/${p.modelName}`,
-                    ios: `${RNFS.DocumentDirectoryPath}/${p.modelName}`
+                    android: `${RNFS.ExternalDirectoryPath}/${p.modelConfig.model}`,
+                    ios: `${RNFS.DocumentDirectoryPath}/${p.modelConfig.model}`
                 })
                 if (!modelPath) {
                     throw new Error('Could not determine model path')
@@ -71,11 +91,10 @@ export function useChat(p: Props) {
                         console.log("Loading model...")
                         console.time("Loading model...")
                         const context = await initLlama({
-                            model: modelPath,
-                            use_mlock: true,
-                            n_ctx: 2048,
-                            n_gpu_layers: 99, // number of layers to store in VRAM (Currently only for iOS)
-
+                            model: `${RNFS.ExternalDirectoryPath}/${p.modelConfig.model}`,
+                            n_ctx: 1024,
+                            n_gpu_layers: 1,
+                            use_mlock: true
                         })
                         contextRef.current = context
                         console.log("Model loaded")
@@ -97,7 +116,28 @@ export function useChat(p: Props) {
         loadModel()
     }, [])
 
-    const sendMessage = async (messages: Message[]) => {
+    const handleFakeMode = async (content: string) => {
+        setIsModelAnswering(true)
+        try {
+            const userMessage = p.fakeMode?.fakeMessage || { role: 'user', content }
+            setMessages(prevMessages => [...prevMessages, userMessage, { role: 'assistant', content: p.fakeMode?.fakeResponse.content! }])
+            // spl the fake response a simulate a fast stream to update setResponse
+            const fakeResponse = p.fakeMode?.fakeResponse.content.split('')
+            for (const char of fakeResponse || []) {
+                setTimeout(() => {
+                    setCurrentResponse(prevResponse => prevResponse + char)
+                }, 100)
+            }
+        } finally {
+            setIsModelAnswering(false)
+            setCurrentResponse("")
+        }
+    }
+    const sendUserMessage = async (content: string) => {
+        if (p.fakeMode?.fakeMessage) {
+            handleFakeMode(content)
+            return;
+        }
         const context = contextRef.current
         if (!context) {
             console.error('Model not loaded')
@@ -107,9 +147,11 @@ export function useChat(p: Props) {
         let response = ""
 
         try {
+            setMessages(prevMessages => [...prevMessages, { role: 'user', content }])
+
             await context.completion(
                 {
-                    messages: [...messages],
+                    messages: [...messages, { role: 'user', content }],
                     n_predict: -1,
                     stop: ["<end_of_turn>", "<|eot_id|>", "Human:", "Assistant:"],
                     temperature: 0.7,
@@ -123,6 +165,9 @@ export function useChat(p: Props) {
                     }
                 },
             )
+
+            const assistantMessage = p.fakeMode?.fakeResponse || { role: 'assistant', content: response }
+            setMessages(prevMessages => [...prevMessages, assistantMessage])
             setCurrentResponse("")
             return response
         } catch (error) {
@@ -138,6 +183,8 @@ export function useChat(p: Props) {
         error,
         isModelAnswering,
         currentResponse,
-        sendMessage
+        sendUserMessage,
+        messages,
+        setMessages
     }
 } 

@@ -20,7 +20,7 @@ export const MessageList = memo(function MessageList({ messages, children }: Mes
     return (
         <ScrollView
             ref={scrollViewRef}
-            className="flex-1 px-4 pb-48 "
+            className="flex-1 px-4 pb-10 "
             contentContainerStyle={{ gap: 8 }}
         >
             {messages.map((message, index) => (

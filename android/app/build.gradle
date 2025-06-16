@@ -84,9 +84,19 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        
+        // Add memory configurations
+        dexOptions {
+            javaMaxHeapSize "4g"
+        }
     }
 
-  
+    // Add memory configurations
+    dexOptions {
+        javaMaxHeapSize "4g"
+        preDexLibraries true
+        maxProcessCount 8
+    }
 
     signingConfigs {
         debug {

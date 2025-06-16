@@ -1,42 +1,44 @@
-import { useEffect, useState } from 'react'
-import { View, ScrollView } from 'react-native'
+import { View, ScrollView, Pressable } from 'react-native'
 import { MessageList } from './components/message-list'
 import { StreamingBubble } from './components/streaming-bubble'
 import { ChatInput } from './components/chat-input'
-import { Message } from '@/types/ai-types'
 import { Text } from '@/components/ui/text'
 import { useChat } from '@/hooks/use-chat'
-import { MODEL_CONFIG } from '@/configs/model-config'
+import { CHAT_CONFIG } from '@/configs/chat-config'
+import { ChatConfigManager } from '@/lib/chat-manager'
+import { useRef, useEffect, useState } from 'react'
+import { ArrowUp } from 'lucide-react-native'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+
+export const chatConfigManager = new ChatConfigManager(CHAT_CONFIG)
 
 export function AiChat() {
-    const [messages, setMessages] = useState<Message[]>([{
-        role: 'system',
-        content: 'This is a conversation between user on his mobile phone and assistant, a friendly chatbot. When retunring code, use markdown code block syntax.',
-    }])
-    const { isModelReady, error, isModelAnswering, currentResponse, sendMessage } = useChat({ modelName: MODEL_CONFIG.modelName })
-
+    const scrollViewRef = useRef<ScrollView>(null)
+    const [showScrollTop, setShowScrollTop] = useState(false)
+    const { isModelReady, error, isModelAnswering, currentResponse, sendUserMessage, messages } = useChat({
+        // initialMessages: chatConfigManager.getFakeMessages(),
+        modelConfig: chatConfigManager.getConfig().modelConfig,
+        fakeDelay: chatConfigManager.getConfig().fakeDelay,
+        // fakeMode: {
+        //     fakeMessage: chatConfigManager.generateRandomMessage(),
+        //     fakeResponse: chatConfigManager.generateRandomMessage()
+        // }
+    })
 
     useEffect(() => {
-        if (isModelReady) {
-            setTimeout(() => {
-                handleSendMessage('Hello,what is the js code for a fibonacci sequence?')
-            }, 1000)
+        if (scrollViewRef.current) {
+            scrollViewRef.current.scrollToEnd({ animated: true })
         }
-    }, [isModelReady])
+    }, [messages, isModelAnswering, currentResponse])
 
-    const handleSendMessage = async (content: string) => {
-        const userMessage: Message = { role: 'user', content }
-        setMessages(prev => [...prev, userMessage])
+    const handleScroll = (event: any) => {
+        const offsetY = event.nativeEvent.contentOffset.y
+        setShowScrollTop(offsetY > 100)
+    }
 
-        try {
-            const response = await sendMessage([...messages, userMessage])
-            if (response) {
-                const assistantMessage: Message = { role: 'assistant', content: response }
-                setMessages(prev => [...prev, assistantMessage])
-            }
-        } catch (error) {
-            console.error('Error:', error)
-        }
+    const scrollToTop = () => {
+        scrollViewRef.current?.scrollTo({ y: 0, animated: true })
     }
 
     if (!isModelReady) {
@@ -55,7 +57,6 @@ export function AiChat() {
         )
     }
 
-
     return (
         <View className="flex flex-col flex-1">
             {messages.length === 1 && (
@@ -63,16 +64,33 @@ export function AiChat() {
                     <Text className="text-lg text-black">No messages yet, start chatting with Mia</Text>
                 </View>
             )}
-            <ScrollView className="flex-1 ">
+            <ScrollView
+                ref={scrollViewRef}
+                className="flex-1"
+                onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
+            >
                 <MessageList messages={messages.filter(m => m.role !== 'system')}
                 >
                     {isModelAnswering && <StreamingBubble content={currentResponse} />}
                 </MessageList>
-
             </ScrollView>
             <View className="w-full bg-white">
-                <ChatInput onSend={handleSendMessage} disabled={isModelAnswering} />
+                <ChatInput onSend={sendUserMessage} disabled={isModelAnswering} />
             </View>
+            {showScrollTop && (
+                <Button
+                    onPress={scrollToTop}
+                    className={cn(
+                        "absolute bottom-20 right-4 size-10 rounded-full bg-primary",
+                        "items-center justify-center shadow-lg ",
+                        "active:opacity-80"
+                    )}
+                >
+                    <ArrowUp className="text-white" size={20} />
+                </Button>
+            )}
         </View>
     )
 } 
